@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0b0c">
+<title>Mi Quiniela en directo</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0b0c;--card:#17171a;--ink:#f2f2f3;--mut:#9b9ba3;--line:#2a2a30;--ok:#34c26f;--okbg:#10301d;--ko:#ff5a4e;--kobg:#3a1513;--live:#ff4d4d;--livebg:#2a1214;--acc:#3b82f6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:12px 12px 60px}
+h1{font-size:20px;margin:4px 0 10px}
+h2{font-size:15px;margin:18px 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.sum{box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.sc{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.sc button{border:0;background:transparent;color:var(--ink);font:700 18px/1 inherit;width:36px;height:36px;cursor:pointer}
+.sc b{min-width:26px;text-align:center;font-size:18px;font-variant-numeric:tabular-nums}
+.dash{font-weight:700;color:var(--mut)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--live);margin-right:5px;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.liveStrip{margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--livebg);border:1px solid var(--live);font-size:14px}
+.liveStrip div{margin:2px 0}
+.teams .gs{font-variant-numeric:tabular-nums;margin:0 6px;padding:1px 7px;border-radius:6px;background:var(--line)}
+.m.live .teams .gs{background:var(--live);color:#fff}
+.big{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.big b{font-size:34px;line-height:1}
+.mut{color:var(--mut);font-size:13px}
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.cat{border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+.cat .k{font-size:12px;color:var(--mut)}
+.cat .v{font-weight:600;font-variant-numeric:tabular-nums}
+.cat.sure{background:var(--okbg);border-color:var(--ok)}
+.cat.dead{opacity:.45}
+.msg{margin-top:10px;font-size:14px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.m{border-left:4px solid var(--line)}
+.m.hit{border-left-color:var(--ok)}
+.m.miss{border-left-color:var(--ko)}
+.m.live{background:var(--livebg);border-color:var(--live)}
+.m.live.hit{border-left-color:var(--ok)}
+.m.live.miss{border-left-color:var(--ko)}
+.n{font-weight:700;width:22px;color:var(--mut)}
+.teams{flex:1;min-width:0;font-weight:600}
+.bd{flex-basis:auto}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+input.t{flex:1;min-width:0}
+input.p{width:56px;text-align:center}
+.sg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.sg button{border:0;background:transparent;color:var(--ink);font:600 15px/1 inherit;width:38px;height:34px;cursor:pointer;border-right:1px solid var(--line)}
+.sg button:last-child{border-right:0}
+.sg.pick button.on{background:var(--acc);color:#fff}
+.sg.res button.on{background:var(--ink);color:var(--card)}
+.lbl{font-size:12px;color:var(--mut);margin-right:2px}
+.line2{margin-top:8px;justify-content:space-between}
+.line3{margin-top:8px}
+.pp{font-size:12px;color:var(--mut)}
+.badge{font-size:12px;font-weight:700;padding:2px 7px;border-radius:20px}
+.badge.ok{background:var(--okbg);color:var(--ok)}
+.badge.ko{background:var(--kobg);color:var(--ko)}
+.badge.lv{background:var(--livebg);color:var(--live)}
+.btn{font:600 14px inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 12px;cursor:pointer}
+.btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn.warn{color:var(--ko)}
+.bar{display:flex;align-items:center;gap:6px;font-size:13px;font-variant-numeric:tabular-nums}
+.bar i{display:block;height:10px;background:var(--acc);border-radius:3px;min-width:2px}
+.need li{margin:3px 0}
+.need{padding-left:18px;margin:6px 0 0}
+.tog{display:flex;gap:6px;flex-wrap:wrap}
+.tog button.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:5px 4px;border-bottom:1px solid var(--line)}
+textarea{width:100%;min-height:80px;font-size:12px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚽ Mi Quiniela en directo</h1>
+
+  <div class="card sum" id="sum"></div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <input type="text" id="jname" class="t" placeholder="Nombre de la jornada (ej. J12)">
+      <div class="tog">
+        <button class="btn" id="bEdit">✏️ Editar</button>
+        <button class="btn" id="bLive">📺 Directo</button>
+      </div>
+    </div>
+    <div class="mut" style="margin-top:8px" id="modeHelp"></div>
+    <div class="row" style="margin-top:8px">
+      <span class="lbl">Probabilidades de los partidos abiertos:</span>
+      <div class="tog">
+        <button class="btn" data-mode="odds">Cuotas / %</button>
+        <button class="btn" data-mode="hist">Mi historial</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="matches"></div>
+
+  <div class="card m" id="plenoCard">
+    <div class="row"><span class="n">P15</span><span class="teams" id="plTeams">Pleno al 15</span><span id="plBadge"></span></div>
+    <div class="mut" id="plInfo" style="margin-left:30px"></div>
+    <div class="row line3 editOnly">
+      <input type="text" class="t" id="plL" placeholder="Local">
+      <input type="text" class="t" id="plV" placeholder="Visitante">
+      <input type="text" class="p" style="width:90px" id="plH" placeholder="Hora">
+      <input type="text" class="p" style="width:70px" id="plPick" placeholder="Ej. 1-2">
+    </div>
+    <div class="row line2">
+      <select id="plSt"><option value="p">Pendiente</option><option value="h">Acertado</option><option value="m">Fallado</option></select>
+      <span class="row"><span class="lbl">Prob. de acertarlo</span><input type="number" class="p" id="plPr" min="0" max="100" step="1">%</span>
+    </div>
+  </div>
+
+  <div class="row" style="gap:8px;margin-top:6px">
+    <button class="btn pri" id="bSave">💾 Cerrar jornada y guardar</button>
+    <button class="btn warn" id="bNew">🗑️ Nueva jornada</button>
+  </div>
+
+  <h2>Mi historial</h2>
+  <div class="card" id="stats"></div>
+  <div class="card" id="histList"></div>
+
+  <h2>Copia de seguridad</h2>
+  <div class="card">
+    <div class="mut">Los datos se guardan solo en este navegador. Copia el texto para pasarlo a otro dispositivo, o pega uno y pulsa Importar.</div>
+    <textarea id="io" style="margin-top:8px"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="bExp">Copiar datos</button>
+      <button class="btn" id="bImp">Importar</button>
+      <span class="mut" id="ioMsg"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const N=14, LS='quiniela-casera-v3', PRICE=0.75, SIG=['1','X','2'];
+const blankMatch=()=>({l:'',v:'',h:'',sel:[false,false,false],st:'p',res:null,gl:null,gv:null,min:'',pr:['','','']});
+const blank=()=>({name:'',matches:Array.from({length:N},blankMatch),pleno:{l:'',v:'',h:'',pick:'',st:'p',pr:10}});
+// Jornada 18 (1 nov 2026) precargada
+const PRE=(()=>{const M=(l,v,h,sel,st,res,pr,lae,g)=>({l,v,h,sel:[0,1,2].map(k=>sel.includes(k)),st,res,pr:pr||['','',''],lae,gl:g?g[0]:null,gv:g?g[1]:null,min:''});
+ return {name:'J18 · 1 nov 2026',matches:[
+  M('Levante','At. Madrid','Sáb 14:00',[2],'f',2,['17','21','62'],[9,15,76],[0,2]),
+  M('Rayo Vallecano','Celta','Sáb 16:15',[0],'f',0,['38','30','32'],[33,35,32],[3,0]),
+  M('Betis','Málaga','Sáb 18:30',[0],'f',0,['72','17','11'],[87,8,5],[2,1]),
+  M('Barcelona','Alavés','Sáb 20:00',[0],'f',0,['86','9','5'],[93,4,3],[6,1]),
+  M('Getafe','Sevilla','Dom 14:00',[2],'p',null,['30','32','38'],[20,34,46]),
+  M('Racing Santander','Real Madrid','Dom 16:15',[2],'p',null,['10','13','77'],[5,6,89]),
+  M('Elche','Valencia','Dom 18:30',[0],'p',null,['41','28','31'],[39,34,27]),
+  M('Eibar','Almería','Sáb',[0,1,2],'f',1,['37','27','36'],[38,33,29],[1,1]),
+  M('Eldense','Granada','Dom 14:00',[0,2],'p',null,['41','28','31'],[27,30,43]),
+  M('Burgos','Castellón','Dom 18:30',[1,2],'p',null,['26','28','46'],[24,30,46]),
+  M('Alavés (F)','Real Sociedad (F)','Dom 12:00',[1,2],'p',null,['20','24','56'],[22,28,50]),
+  M('Madrid CFF (F)','Deportivo (F)','Sáb 18:00',[0],'f',0,['39','28','33'],[68,19,13],[2,1]),
+  M('Sevilla (F)','Real Madrid (F)','Dom 19:00',[2],'p',null,['15','22','63'],[7,11,82]),
+  M('Tenerife (F)','Athletic (F)','Lun 20:00',[1],'p',null,['36','28','36'],[32,28,40])],
+ pleno:{l:'Athletic Club',v:'Real Sociedad',h:'Dom 21:00',pick:'1-2',st:'p',pr:7}}})();
+let S={cur:PRE,hist:[],mode:'odds',edit:false};
+try{const r=localStorage.getItem(LS);if(r){const o=JSON.parse(r);if(o&&o.cur)S=Object.assign(S,o)}}catch(e){}
+(function migrate(){try{S.cur.matches.forEach((m,i)=>{if(!('gl' in m)){m.gl=null;m.gv=null;m.min=''}
+  const q=PRE.matches[i];if(m.gl==null&&q&&q.gl!=null&&m.l===q.l&&m.st==='f'){m.gl=q.gl;m.gv=q.gv;m.res=q.res}})}catch(e){}})();
+function deriveRes(m){if(m.gl!=null&&m.gv!=null)m.res=m.gl>m.gv?0:m.gl===m.gv?1:2}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- probability helpers ----------
+function baseProbs(m){
+  const a=m.pr.map(x=>parseFloat(String(x).replace(',','.')));
+  if(a.some(x=>!(x>0)))return [0.45,0.28,0.27];
+  const s=a[0]+a[1]+a[2];
+  if(s>=90&&s<=110)return a.map(x=>x/s);
+  if(a.every(x=>x>1)){const inv=a.map(x=>1/x),t=inv[0]+inv[1]+inv[2];return inv.map(x=>x/t)}
+  return a.map(x=>x/s);
+}
+function histRates(){
+  let h1=0,n1=0,h2=0,n2=0;
+  for(const j of S.hist)for(const m of j.matches){
+    if(m.res==null)continue;const k=m.sel.filter(Boolean).length;
+    if(k===1){n1++;if(m.sel[m.res])h1++}
+    if(k===2){n2++;if(m.sel[m.res])h2++}
+  }
+  return {n1,n2,r1:n1?h1/n1:null,r2:n2?h2/n2:null};
+}
+function effProbs(m){
+  const b=baseProbs(m);
+  if(m.st==='l'&&m.res!=null)return b.map((p,i)=>0.5*p+0.5*(i===m.res?1:0));
+  return b;
+}
+function pHit(m,HR){
+  const k=m.sel.filter(Boolean).length;
+  if(k===0)return 0; if(k===3)return 1;
+  if(S.mode==='hist'&&m.st==='p'){
+    if(k===1&&HR.n1>=10)return HR.r1;
+    if(k===2&&HR.n2>=5)return HR.r2;
+  }
+  const p=effProbs(m);return m.sel.reduce((s,on,i)=>s+(on?p[i]:0),0);
+}
+const isHit=m=>m.res!=null&&m.sel[m.res];
+function fmtP(p){
+  if(p<=0)return '0%'; if(p>=0.9995)return '100%';
+  if(p<0.001)return '1 entre '+Math.round(1/p).toLocaleString('es-ES');
+  return (p*100).toLocaleString('es-ES',{maximumFractionDigits:p<0.1?1:0})+'%';
+}
+// columns with k hits for a multiple, given hit flags per match
+function colsByHits(flags,sels){
+  let poly=[1];
+  sels.forEach((s,i)=>{
+    if(s===0)return;
+    const next=new Array(poly.length+1).fill(0);
+    poly.forEach((c,k)=>{
+      if(flags[i]){next[k+1]+=c;next[k]+=c*(s-1)}else next[k]+=c*s;
+    });poly=next;
+  });return poly;
+}
+
+// ---------- compute ----------
+function compute(){
+  const ms=S.cur.matches, HR=histRates();
+  let fixed=0,now=0,open=[];
+  ms.forEach((m,i)=>{
+    if(m.st==='f'&&m.res!=null){if(isHit(m))fixed++}
+    else open.push(i);
+    if(m.res!=null&&m.st!=='p'&&isHit(m))now++;
+  });
+  let dist=[1];
+  for(const i of open){
+    const p=pHit(ms[i],HR),nx=new Array(dist.length+1).fill(0);
+    dist.forEach((c,k)=>{nx[k]+=c*(1-p);nx[k+1]+=c*p});dist=nx;
+  }
+  const P=t=>{let s=0;dist.forEach((c,k)=>{if(fixed+k>=t)s+=c});return s};
+  const P14=P(14), pl=S.cur.pleno, pp=pl.st==='h'?1:pl.st==='m'?0:(Math.min(100,Math.max(0,+pl.pr||0))/100);
+  const openPick=open.filter(i=>ms[i].sel.some(Boolean)).length;
+  return {HR,fixed,now,open,dist,P,P14,pPleno:P14*pp,maxPos:fixed+openPick,exp:fixed+dist.reduce((s,c,k)=>s+c*k,0)};
+}
+
+// ---------- render matches ----------
+function matchHTML(m,i){
+  return `<div class="card m" id="m${i}">
+   <div class="row"><span class="n">${i+1}</span><span class="teams" data-i="${i}"></span><span class="bd"></span></div>
+   <div class="mut hora" style="margin-left:30px"></div>
+   <div class="row line3 editOnly">
+     <input type="text" class="t" data-i="${i}" data-f="l" placeholder="Local" value="${esc(m.l)}">
+     <input type="text" class="t" data-i="${i}" data-f="v" placeholder="Visitante" value="${esc(m.v)}">
+     <input type="text" class="p" style="width:90px" data-i="${i}" data-f="h" placeholder="Hora" value="${esc(m.h||'')}">
+   </div>
+   <div class="row line2">
+     <span class="row" style="gap:4px"><span class="lbl">Mi signo</span><span class="sg pick">${SIG.map((s,k)=>`<button data-i="${i}" data-pick="${k}">${s}</button>`).join('')}</span></span>
+     <select data-i="${i}" data-f="st"><option value="p">Pendiente</option><option value="l">En juego</option><option value="f">Final</option></select>
+   </div>
+   <div class="row line2 resRow">
+     <span class="row" style="gap:6px"><span class="lbl">Marcador</span>
+       <span class="sc"><button data-i="${i}" data-g="l-">−</button><b class="gl"></b><button data-i="${i}" data-g="l+">+</button></span>
+       <span class="dash">–</span>
+       <span class="sc"><button data-i="${i}" data-g="v-">−</button><b class="gv"></b><button data-i="${i}" data-g="v+">+</button></span>
+     </span>
+     <input type="text" inputmode="numeric" class="p minIn" data-i="${i}" data-f="min" placeholder="minuto" value="${esc(m.min||'')}">
+   </div>
+   <div class="row line3 editOnly">
+     <span class="lbl">Cuotas o %</span>
+     ${SIG.map((s,k)=>`<input type="text" inputmode="decimal" class="p" data-i="${i}" data-pr="${k}" placeholder="${s}" value="${esc(m.pr[k])}">`).join('')}
+     <span class="pp"></span>
+   </div>
+  </div>`;
+}
+function renderMatches(){
+  $('matches').innerHTML=S.cur.matches.map(matchHTML).join('');
+  S.cur.matches.forEach((m,i)=>{$('m'+i).querySelector('select').value=m.st});
+  const pl=S.cur.pleno;$('plL').value=pl.l;$('plH').value=pl.h||'';$('plPick').value=pl.pick||'';$('plV').value=pl.v;$('plSt').value=pl.st;$('plPr').value=pl.pr;
+  $('jname').value=S.cur.name;
+}
+function updRow(i){
+  const m=S.cur.matches[i],el=$('m'+i);
+  el.querySelector('.hora').textContent=[m.h,m.lae?`La gente apostó: ${m.lae.join(' / ')} %`:''].filter(Boolean).join(' · ');
+  const hasG=m.gl!=null&&m.gv!=null&&m.st!=='p';
+  el.querySelector('.teams').innerHTML=(m.l||m.v)?`${esc(m.l||'?')}${hasG?`<span class="gs">${m.gl}-${m.gv}</span>`:' – '}${esc(m.v||'?')}`:`Partido ${i+1}`;
+  el.querySelector('.gl').textContent=m.gl??'–';el.querySelector('.gv').textContent=m.gv??'–';
+  const mi=el.querySelector('.minIn');mi.classList.toggle('hide',m.st!=='l');if(document.activeElement!==mi)mi.value=m.min||'';
+  el.querySelectorAll('[data-pick]').forEach(b=>b.classList.toggle('on',m.sel[+b.dataset.pick]));
+  el.querySelectorAll('[data-res]').forEach(b=>b.classList.toggle('on',m.res===+b.dataset.res));
+  el.querySelector('.resRow').classList.toggle('hide',m.st==='p');
+  const p=baseProbs(m);el.querySelector('.pp').textContent=p.map(x=>Math.round(x*100)).join(' / ')+' %';
+  el.classList.remove('hit','miss','live');
+  let bd='';
+  if(m.st!=='p'&&m.res!=null){
+    const h=isHit(m);el.classList.add(h?'hit':'miss');
+    if(m.st==='l'){el.classList.add('live');bd=`<span class="badge lv"><span class="dot"></span>EN JUEGO${m.min?' · '+esc(m.min)+"'":''} · ${h?'va bien':'va mal'}</span>`}
+    else bd=`<span class="badge ${h?'ok':'ko'}">${h?'✓ acierto':'✗ fallo'}</span>`;
+  }else if(m.st==='l'){el.classList.add('live');bd='<span class="badge lv"><span class="dot"></span>EN JUEGO</span>'}
+  el.querySelector('.bd').innerHTML=bd;
+}
+function updPleno(){
+  const pl=S.cur.pleno,c=$('plenoCard');
+  $('plInfo').textContent=[pl.h,pl.pick?'Tu pleno: '+pl.pick:''].filter(Boolean).join(' · ');
+  $('plTeams').textContent=(pl.l||pl.v)?`Pleno: ${pl.l||'?'} – ${pl.v||'?'}`:'Pleno al 15';
+  c.classList.remove('hit','miss');
+  if(pl.st==='h')c.classList.add('hit'); if(pl.st==='m')c.classList.add('miss');
+  $('plBadge').innerHTML=pl.st==='h'?'<span class="badge ok">✓</span>':pl.st==='m'?'<span class="badge ko">✗</span>':'';
+}
+
+// ---------- summary ----------
+function renderSum(){
+  const ms=S.cur.matches,R=compute();
+  const sels=ms.map(m=>m.sel.filter(Boolean).length), bets=sels.every(s=>s>0)?sels.reduce((a,b)=>a*b,1):0;
+  const cats=[[14,'14 · 1ª'],[13,'13 · 2ª'],[12,'12 · 3ª'],[11,'11 · 4ª'],[10,'10 · 5ª']];
+  let html=`<div class="big"><b>${R.now}</b><span>aciertos ahora</span><span class="mut">· seguros ${R.fixed} · máx. posible ${R.maxPos} · esperado ${R.exp.toLocaleString('es-ES',{maximumFractionDigits:1})}</span></div>`;
+  html+='<div class="cats">'+cats.map(([t,l])=>{const p=R.P(t);return `<div class="cat ${p>=0.9995?'sure':p<=0?'dead':''}"><div class="k">${l}</div><div class="v">${fmtP(p)}</div></div>`}).join('')+
+    `<div class="cat ${R.pPleno<=0?'dead':''}"><div class="k">Pleno al 15</div><div class="v">${fmtP(R.pPleno)}</div></div></div>`;
+  // message
+  let msg='';
+  const openPick=R.open.filter(i=>ms[i].sel.some(Boolean));
+  if(R.fixed>=10)msg=`🎉 Premio asegurado: ya tienes <b>${R.fixed}</b> aciertos cerrados.`;
+  else if(R.maxPos<10)msg=`😕 Ya no llegas a 10: como mucho harías ${R.maxPos}.`;
+  else{const need=10-R.fixed;msg=`Para premio necesitas acertar <b>${need}</b> de los <b>${openPick.length}</b> partidos que quedan${need===openPick.length?' (todos)':''}.`}
+  const lives=ms.map((m,i)=>({m,i})).filter(x=>x.m.st==='l');
+  if(lives.length)html+='<div class="liveStrip"><b><span class="dot"></span>En juego ahora</b>'+lives.map(({m,i})=>`<div>${i+1}. ${esc(m.l||'?')} <b>${m.gl??0}-${m.gv??0}</b> ${esc(m.v||'?')}${m.min?` · ${esc(m.min)}'`:''} · ${isHit(m)?'✅ te va bien':'❌ te va mal'}</div>`).join('')+'</div>';
+  html+=`<div class="msg">${msg}</div>`;
+  // what remains
+  if(openPick.length&&R.maxPos>=10){
+    const items=openPick.map(i=>({i,p:pHit(ms[i],R.HR)})).sort((a,b)=>a.p-b.p);
+    html+=`<details style="margin-top:6px"><summary class="mut">Qué te tiene que salir (${openPick.length})</summary><ul class="need">`+
+      items.map(({i,p})=>{const m=ms[i];const nm=(m.l||m.v)?`${m.l||'?'}–${m.v||'?'}`:`Partido ${i+1}`;
+        return `<li><b>${i+1}.</b> ${esc(nm)}: ${m.sel.map((on,k)=>on?SIG[k]:null).filter(Boolean).join(' o ')} <span class="mut">· ${fmtP(p)}${m.st==='l'?' · en juego':''}</span></li>`}).join('')+'</ul></details>';
+  }
+  if(bets>1){
+    const flagsNow=ms.map(m=>m.st!=='p'&&isHit(m));
+    const flagsBest=ms.map(m=>(m.st==='f')?isHit(m):m.sel.some(Boolean));
+    const cn=colsByHits(flagsNow,sels),cb=colsByHits(flagsBest,sels);
+    const line=c=>[14,13,12,11,10].filter(k=>c[k]).map(k=>`${c[k]}×${k}`).join(', ')||'ninguna con premio';
+    html+=`<div class="mut" style="margin-top:6px">Columnas premiadas si acabara ya: ${line(cn)} · en el mejor caso: ${line(cb)}</div>`;
+  }
+  // history line
+  const H=S.hist.filter(j=>j.nres>=14);
+  if(H.length)html+=`<div class="mut" style="margin-top:6px">Tu historial: llegas a 10+ en el ${fmtP(H.filter(j=>j.hits>=10).length/H.length)} de tus ${H.length} jornadas.</div>`;
+  html+=`<div class="mut" style="margin-top:4px">${bets?`${bets.toLocaleString('es-ES')} apuesta${bets>1?'s':''} · ${(bets*PRICE).toLocaleString('es-ES',{style:'currency',currency:'EUR'})}`:'Marca tu signo en los 14 partidos'}</div>`;
+  $('sum').innerHTML=html;
+}
+
+// ---------- history ----------
+let pendingDel=null;
+function renderHist(){
+  const H=S.hist, HR=histRates();
+  if(!H.length){$('stats').innerHTML='<div class="mut">Aún no hay jornadas guardadas. Al acabar cada jornada pulsa «Cerrar jornada y guardar» y aquí irán saliendo tus estadísticas.</div>';$('histList').classList.add('hide');}
+  else{
+    $('histList').classList.remove('hide');
+    const full=H.filter(j=>j.nres>=14), hs=full.map(j=>j.hits);
+    const avg=hs.length?hs.reduce((a,b)=>a+b,0)/hs.length:0;
+    let s=`<div class="row" style="gap:18px">
+      <div><div class="mut">Jornadas</div><b>${H.length}</b></div>
+      <div><div class="mut">Media</div><b>${avg.toLocaleString('es-ES',{maximumFractionDigits:1})}</b></div>
+      <div><div class="mut">Mejor</div><b>${hs.length?Math.max(...hs):'–'}</b></div>
+      <div><div class="mut">10 o más</div><b>${hs.length?fmtP(hs.filter(x=>x>=10).length/hs.length):'–'}</b></div>
+    </div>
+    <div class="mut" style="margin-top:8px">Aciertas el ${HR.r1!=null?fmtP(HR.r1):'–'} de tus fijos (${HR.n1}) y el ${HR.r2!=null?fmtP(HR.r2):'–'} de tus dobles (${HR.n2}).</div>`;
+    if(hs.length){
+      const mn=Math.min(...hs),mx=Math.max(...hs),cnt={};hs.forEach(x=>cnt[x]=(cnt[x]||0)+1);
+      const top=Math.max(...Object.values(cnt));
+      s+='<div style="margin-top:8px">';
+      for(let k=mx;k>=mn;k--)s+=`<div class="bar"><span style="width:22px">${k}</span><i style="width:${(cnt[k]||0)/top*70}%"></i><span class="mut">${cnt[k]||0}</span></div>`;
+      s+='</div>';
+    }
+    $('stats').innerHTML=s;
+    $('histList').innerHTML='<table>'+H.map((j,ix)=>({j,ix})).reverse().map(({j,ix})=>
+      `<tr><td>${esc(j.name||'Jornada')}<div class="mut">${j.date}</div></td><td><b>${j.hits}</b>/${j.nres}${j.pleno==='h'?' +P15':''}</td><td style="text-align:right"><button class="btn warn" data-del="${ix}">${pendingDel===ix?'¿Seguro?':'Borrar'}</button></td></tr>`).join('')+'</table>';
+  }
+}
+
+// ---------- mode / edit ----------
+function renderModes(){
+  document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===S.mode));
+  $('bEdit').classList.toggle('on',S.edit);$('bLive').classList.toggle('on',!S.edit);
+  document.querySelectorAll('.editOnly').forEach(e=>e.classList.toggle('hide',!S.edit));
+  const HR=histRates();
+  $('modeHelp').innerHTML=S.mode==='hist'
+    ?(HR.n1>=10?`Usando tu tasa real: ${fmtP(HR.r1)} en fijos${HR.n2>=5?`, ${fmtP(HR.r2)} en dobles`:''}. Partidos en juego: se usan las cuotas y el marcador.`:'Necesitas al menos 10 fijos guardados en el historial; mientras tanto se usan las cuotas.')
+    :'Probabilidades: % «reales» sacados de las cuotas de las casas de apuestas (Eduardo Losilla, 31/10). Puedes cambiarlos en ✏️ Editar. En juego, el signo que va ganando pesa la mitad.';
+}
+function refresh(){renderSum();save()}
+function all(){renderModes();S.cur.matches.forEach((_,i)=>updRow(i));updPleno();renderSum();renderHist();save()}
+
+// ---------- events ----------
+$('matches').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,m=S.cur.matches[i];
+  if(b.dataset.pick!=null){const k=+b.dataset.pick;m.sel[k]=!m.sel[k]}
+  if(b.dataset.g){const side=b.dataset.g[0],d=b.dataset.g[1]==='+'?1:-1;
+    if(m.gl==null){m.gl=0;m.gv=0}
+    const f=side==='l'?'gl':'gv';m[f]=Math.max(0,m[f]+d);deriveRes(m);}
+  updRow(i);refresh();
+});
+$('matches').addEventListener('input',e=>{
+  const t=e.target,i=+t.dataset.i,m=S.cur.matches[i];if(isNaN(i))return;
+  if(t.dataset.f==='l'||t.dataset.f==='v'||t.dataset.f==='h')m[t.dataset.f]=t.value;
+  if(t.dataset.pr!=null)m.pr[+t.dataset.pr]=t.value;
+  if(t.dataset.f==='st'){setSt(m,t.value)}
+  if(t.dataset.f==='min')m.min=t.value;
+  updRow(i);refresh();
+});
+function setSt(m,v){m.st=v;if(v==='p'){m.res=null;m.gl=null;m.gv=null;m.min=''}else if(m.gl==null&&m.res==null){m.gl=0;m.gv=0;deriveRes(m)}if(v==='f')m.min=''}
+$('matches').addEventListener('change',e=>{const t=e.target;if(t.dataset.f==='st'){const m=S.cur.matches[+t.dataset.i];setSt(m,t.value);updRow(+t.dataset.i);refresh()}});
+$('jname').addEventListener('input',e=>{S.cur.name=e.target.value;save()});
+[['plL','l'],['plV','v'],['plH','h'],['plPick','pick']].forEach(([id,f])=>$(id).addEventListener('input',e=>{S.cur.pleno[f]=e.target.value;updPleno();save()}));
+$('plSt').addEventListener('change',e=>{S.cur.pleno.st=e.target.value;updPleno();refresh()});
+$('plPr').addEventListener('input',e=>{S.cur.pleno.pr=e.target.value;refresh()});
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{S.mode=b.dataset.mode;renderModes();refresh()}));
+$('bEdit').onclick=()=>{S.edit=true;renderModes();save()};
+$('bLive').onclick=()=>{S.edit=false;renderModes();save()};
+
+let newArm=false;
+$('bNew').onclick=()=>{
+  if(!newArm){newArm=true;$('bNew').textContent='¿Borrar la jornada actual?';setTimeout(()=>{newArm=false;$('bNew').textContent='🗑️ Nueva jornada'},3000);return}
+  newArm=false;$('bNew').textContent='🗑️ Nueva jornada';S.cur=blank();renderMatches();all();
+};
+$('bSave').onclick=()=>{
+  const ms=S.cur.matches,withRes=ms.filter(m=>m.res!=null);
+  if(!withRes.length){$('bSave').textContent='Marca algún resultado primero';setTimeout(()=>$('bSave').textContent='💾 Cerrar jornada y guardar',2500);return}
+  S.hist.push({name:S.cur.name||`Jornada ${S.hist.length+1}`,date:new Date().toISOString().slice(0,10),hits:withRes.filter(isHit).length,nres:withRes.length,
+    matches:ms.map(m=>({sel:m.sel.slice(),res:m.res,gl:m.gl,gv:m.gv,l:m.l,v:m.v})),pleno:S.cur.pleno.st});
+  // keep team names off, reset jornada
+  S.cur=blank();renderMatches();all();
+  $('stats').scrollIntoView({behavior:'smooth'});
+};
+$('histList').addEventListener('click',e=>{
+  const b=e.target.closest('[data-del]');if(!b)return;const ix=+b.dataset.del;
+  if(pendingDel!==ix){pendingDel=ix;renderHist();setTimeout(()=>{if(pendingDel===ix){pendingDel=null;renderHist()}},3000);return}
+  S.hist.splice(ix,1);pendingDel=null;all();
+});
+$('bExp').onclick=async()=>{
+  const txt=JSON.stringify(S);$('io').value=txt;
+  try{await navigator.clipboard.writeText(txt);$('ioMsg').textContent='Copiado ✓'}catch(e){$('io').select();$('ioMsg').textContent='Selecciona y copia el texto'}
+};
+$('bImp').onclick=()=>{
+  try{const o=JSON.parse($('io').value);if(!o.cur||!Array.isArray(o.hist))throw 0;S=Object.assign({mode:'odds',edit:true},o);renderMatches();all();$('ioMsg').textContent='Importado ✓'}
+  catch(e){$('ioMsg').textContent='Ese texto no es válido'}
+};
+
+renderMatches();all();
+</script>
+</body>
+</html>
