@@ -73,6 +73,23 @@ table{width:100%;border-collapse:collapse;font-size:14px}
 td{padding:5px 4px;border-bottom:1px solid var(--line)}
 textarea{width:100%;min-height:80px;font-size:12px}
 .hide{display:none!important}
+.hrow{cursor:pointer}
+.hrow:hover td{background:rgba(255,255,255,.03)}
+.arrow{display:inline-block;width:14px;color:var(--mut);transition:transform .15s}
+.hrow.open .arrow{transform:rotate(90deg)}
+.hdet td{padding:4px 0 12px}
+.hm{display:flex;align-items:center;gap:8px;padding:6px 8px;margin:4px 0;border-radius:8px;border-left:4px solid var(--line);background:var(--bg);font-size:14px}
+.hm.ok{border-left-color:var(--ok)}
+.hm.ko{border-left-color:var(--ko)}
+.hm .num{width:22px;color:var(--mut);font-weight:700}
+.hm .tm{flex:1;min-width:0}
+.hm .gs{font-variant-numeric:tabular-nums;margin:0 5px;padding:1px 6px;border-radius:5px;background:var(--line)}
+.chips{display:inline-flex;gap:3px}
+.chip{width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1px solid var(--line);color:var(--mut)}
+.chip.pick{background:var(--acc);border-color:var(--acc);color:#fff}
+.chip.res{outline:2px solid var(--ink);outline-offset:1px;color:var(--ink)}
+.hsum{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 4px;font-size:13px;color:var(--mut)}
+.hsum b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -342,6 +359,28 @@ function renderSum(){
 
 // ---------- history ----------
 let pendingDel=null;
+const openHist=new Set();
+const plSt=j=>typeof j.pleno==='string'?j.pleno:(j.pleno&&j.pleno.st)||'p';
+function histDetail(j){
+  const ms=j.matches||[];
+  const sels=ms.map(m=>m.sel.filter(Boolean).length), bets=sels.every(x=>x>0)?sels.reduce((a,b)=>a*b,1):0;
+  const cols=colsByHits(ms.map(m=>m.res!=null&&m.sel[m.res]),sels);
+  const prem=[14,13,12,11,10].filter(k=>cols[k]).map(k=>`${cols[k]}×${k}`).join(', ');
+  let h=`<div class="hsum"><span>Aciertos <b>${j.hits}/${j.nres}</b></span>${bets?`<span>Apuestas <b>${bets}</b> · ${(bets*PRICE).toLocaleString('es-ES',{style:'currency',currency:'EUR'})}</span>`:''}<span>Columnas premiadas <b>${prem||'ninguna'}</b></span></div>`;
+  h+=ms.map((m,i)=>{
+    const ok=m.res!=null&&m.sel[m.res], has=m.gl!=null&&m.gv!=null;
+    const tm=(m.l||m.v)?`${esc(m.l||'?')}${has?`<span class="gs">${m.gl}-${m.gv}</span>`:' – '}${esc(m.v||'?')}`:`Partido ${i+1}`;
+    const chips=SIG.map((s,k)=>`<span class="chip${m.sel[k]?' pick':''}${m.res===k?' res':''}">${s}</span>`).join('');
+    return `<div class="hm ${m.res==null?'':ok?'ok':'ko'}"><span class="num">${i+1}</span><span class="tm">${tm}</span><span class="chips">${chips}</span><span>${m.res==null?'–':ok?'✅':'❌'}</span></div>`;}).join('');
+  const p=typeof j.pleno==='object'&&j.pleno?j.pleno:null, pst=plSt(j);
+  if(p||pst!=='p'){
+    const tm=p&&(p.l||p.v)?`${esc(p.l||'?')} – ${esc(p.v||'?')}`:'Pleno al 15';
+    const det=p?[p.pick?'tú: '+esc(p.pick):'',p.res?'salió: '+esc(p.res):''].filter(Boolean).join(' · '):'';
+    h+=`<div class="hm ${pst==='h'?'ok':pst==='m'?'ko':''}"><span class="num">P15</span><span class="tm">${tm}${det?`<div class="mut">${det}</div>`:''}</span><span>${pst==='h'?'✅':pst==='m'?'❌':'–'}</span></div>`;
+  }
+  h+='<div class="mut" style="margin-top:4px">Azul = tu signo · recuadro = lo que salió</div>';
+  return h;
+}
 function renderHist(){
   const H=S.hist, HR=histRates();
   if(!H.length){$('stats').innerHTML='<div class="mut">Aún no hay jornadas guardadas. Al acabar cada jornada pulsa «Cerrar jornada y guardar» y aquí irán saliendo tus estadísticas.</div>';$('histList').classList.add('hide');}
@@ -364,8 +403,10 @@ function renderHist(){
       s+='</div>';
     }
     $('stats').innerHTML=s;
-    $('histList').innerHTML='<table>'+H.map((j,ix)=>({j,ix})).reverse().map(({j,ix})=>
-      `<tr><td>${esc(j.name||'Jornada')}<div class="mut">${j.date}</div></td><td><b>${j.hits}</b>/${j.nres}${j.pleno==='h'?' +P15':''}</td><td style="text-align:right"><button class="btn warn" data-del="${ix}">${pendingDel===ix?'¿Seguro?':'Borrar'}</button></td></tr>`).join('')+'</table>';
+    $('histList').innerHTML='<div class="mut" style="margin-bottom:6px">Toca una jornada para ver el detalle.</div><table>'+H.map((j,ix)=>({j,ix})).reverse().map(({j,ix})=>{
+      const op=openHist.has(ix), pst=plSt(j);
+      return `<tr class="hrow${op?' open':''}" data-open="${ix}"><td><span class="arrow">▶</span> ${esc(j.name||'Jornada')}<div class="mut" style="margin-left:18px">${j.date}</div></td><td><b>${j.hits}</b>/${j.nres}${pst==='h'?' +P15':''}${j.hits>=10?' 💰':''}</td><td style="text-align:right"><button class="btn warn" data-del="${ix}">${pendingDel===ix?'¿Seguro?':'Borrar'}</button></td></tr>`+
+        (op?`<tr class="hdet"><td colspan="3">${histDetail(j)}</td></tr>`:'');}).join('')+'</table>';
   }
 }
 
@@ -418,15 +459,17 @@ $('bSave').onclick=()=>{
   const ms=S.cur.matches,withRes=ms.filter(m=>m.res!=null);
   if(!withRes.length){$('bSave').textContent='Marca algún resultado primero';setTimeout(()=>$('bSave').textContent='💾 Cerrar jornada y guardar',2500);return}
   S.hist.push({name:S.cur.name||`Jornada ${S.hist.length+1}`,date:new Date().toISOString().slice(0,10),hits:withRes.filter(isHit).length,nres:withRes.length,
-    matches:ms.map(m=>({sel:m.sel.slice(),res:m.res,gl:m.gl,gv:m.gv,l:m.l,v:m.v})),pleno:S.cur.pleno.st});
+    matches:ms.map(m=>({sel:m.sel.slice(),res:m.res,gl:m.gl,gv:m.gv,l:m.l,v:m.v})),pleno:{st:S.cur.pleno.st,l:S.cur.pleno.l,v:S.cur.pleno.v,pick:S.cur.pleno.pick||''}});
   // keep team names off, reset jornada
   S.cur=blank();renderMatches();all();
   $('stats').scrollIntoView({behavior:'smooth'});
 };
 $('histList').addEventListener('click',e=>{
-  const b=e.target.closest('[data-del]');if(!b)return;const ix=+b.dataset.del;
+  const b=e.target.closest('[data-del]');
+  if(!b){const t=e.target.closest('[data-open]');if(!t)return;const k=+t.dataset.open;openHist.has(k)?openHist.delete(k):openHist.add(k);renderHist();return}
+  const ix=+b.dataset.del;
   if(pendingDel!==ix){pendingDel=ix;renderHist();setTimeout(()=>{if(pendingDel===ix){pendingDel=null;renderHist()}},3000);return}
-  S.hist.splice(ix,1);pendingDel=null;all();
+  S.hist.splice(ix,1);pendingDel=null;openHist.clear();all();
 });
 $('bExp').onclick=async()=>{
   const txt=JSON.stringify(S);$('io').value=txt;
